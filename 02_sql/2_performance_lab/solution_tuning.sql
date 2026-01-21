@@ -18,6 +18,7 @@ SET STATISTICS TIME ON; -- Tiempo de CPU
 -- NO usa claves foráneas
 
 */
+PRINT '========== CROSS JOIN  ==========';
 
 SELECT
     c.Cliente_Nombre,
@@ -32,6 +33,7 @@ CROSS JOIN Productos p;
 
 -- Utilizando la tabla transaccional Ventas y las claves foráneas para unir solo registros existentes.
 -- Uniendo filas de dos (o más) tablas solo cuando existe una relación válida entre ellas.
+PRINT '========== INNER JOIN ==========';
 
 SELECT
     c.Cliente_Nombre AS Cliente,
