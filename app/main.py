@@ -7,7 +7,7 @@ import os
 DB_HOST = os.getenv('DB_HOST', 'db')
 DB_USER = os.getenv('DB_USER', 'sa')
 DB_PASS = os.getenv('DB_PASS', 'TuPasswordFuerte123!')
-DB_NAME = 'master'
+DB_NAME = 'master'  # 🔹 nueva base
 
 def get_connection():
     conn_str = (
@@ -26,7 +26,7 @@ def run_ingestion():
     # 1. Leer el CSV
     try:
         print("📂 Leyendo archivo CSV...")
-        df = pd.read_csv('../datos/train.csv')
+        df = pd.read_csv('raw_sales_dump.csv')  # 🔹 nueva ruta
         print(f"✅ CSV cargado. Filas encontradas: {len(df)}")
     except Exception as e:
         print(f"❌ Error leyendo el CSV: {e}")
@@ -38,23 +38,22 @@ def run_ingestion():
         conn = get_connection()
         cursor = conn.cursor()
         print("✅ Conectado a SQL Server")
-        
-        # 3. Crear tabla (Borrarla si ya existe para evitar errores en pruebas)
-        print("🛠  Creando tabla 'trips'...")
-        cursor.execute("IF OBJECT_ID('trips', 'U') IS NOT NULL DROP TABLE trips")
+
+        # 3. Crear tabla RAW
+        print("🛠  Creando tabla 'raw_sales'...")
+        cursor.execute("IF OBJECT_ID('raw_sales', 'U') IS NOT NULL DROP TABLE raw_sales")
         cursor.execute("""
-            CREATE TABLE trips (
-                id VARCHAR(50) PRIMARY KEY,
-                vendor_id INT,
-                pickup_datetime DATETIME,
-                dropoff_datetime DATETIME,
-                passenger_count INT,
-                pickup_longitude FLOAT,
-                pickup_latitude FLOAT,
-                dropoff_longitude FLOAT,
-                dropoff_latitude FLOAT,
-                store_and_fwd_flag VARCHAR(5),
-                trip_duration INT
+            CREATE TABLE raw_sales (
+                Transaccion_ID   INT,
+                Cliente_Nombre   NVARCHAR(150),
+                Cliente_Email    NVARCHAR(150),
+                Producto         NVARCHAR(150),
+                Categoria        NVARCHAR(100),
+                Sucursal         NVARCHAR(100),
+                Ciudad_Sucursal  NVARCHAR(100),
+                Fecha_Venta      DATE,
+                Cantidad         INT,
+                Precio_Unitario  DECIMAL(12,2)
             )
         """)
         
@@ -62,15 +61,29 @@ def run_ingestion():
         print("📥 Insertando datos en SQL Server...")
         for index, row in df.iterrows():
             cursor.execute("""
-                INSERT INTO trips (
-                    id, vendor_id, pickup_datetime, dropoff_datetime, passenger_count,
-                    pickup_longitude, pickup_latitude, dropoff_longitude, dropoff_latitude,
-                    store_and_fwd_flag, trip_duration
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO raw_sales (
+                    Transaccion_ID,
+                    Cliente_Nombre,
+                    Cliente_Email,
+                    Producto,
+                    Categoria,
+                    Sucursal,
+                    Ciudad_Sucursal,
+                    Fecha_Venta,
+                    Cantidad,
+                    Precio_Unitario
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, 
-            row.id, row.vendor_id, row.pickup_datetime, row.dropoff_datetime, row.passenger_count,
-            row.pickup_longitude, row.pickup_latitude, row.dropoff_longitude, row.dropoff_latitude,
-            row.store_and_fwd_flag, row.trip_duration
+            row.Transaccion_ID,
+            row.Cliente_Nombre,
+            row.Cliente_Email,
+            row.Producto,
+            row.Categoria,
+            row.Sucursal,
+            row.Ciudad_Sucursal,
+            row.Fecha_Venta,
+            row.Cantidad,
+            row.Precio_Unitario
             )
         
         print(f"✨ ¡Éxito! Se insertaron {len(df)} registros.")

@@ -1,95 +1,52 @@
-# 🐳 Proyecto ETL: SQL Server + Python Ingestion
+# 🏛️ Reto SQL Architect & Tuner Protocol
 
-Este proyecto despliega un entorno contenerizado que consiste en una base de datos **Microsoft SQL Server** y un servicio de **Python** que realiza una ingesta automática de datos al arrancar.
-
-El objetivo es proporcionar una plantilla lista para usar que resuelva la configuración de drivers ODBC y la comunicación entre contenedores.
-
-## 📋 Requisitos Previos
-
-* [Docker](https://www.docker.com/products/docker-desktop) instalado.
-* [Docker Compose](https://docs.docker.com/compose/install/) instalado.
-
-## 🚀 Inicio Rápido
-
-1.  **Construir y levantar los servicios:**
-    Abre una terminal en la raíz del proyecto y ejecuta:
-
-    ```bash
-    docker compose up --build
-    ```
-
-2.  **¿Qué sucederá?**
-    * Se descargará la imagen de SQL Server 2022.
-    * Se construirá la imagen de Python instalando los drivers `msodbcsql17`.
-    * **Esperar a la BD:** El contenedor de Python esperará automáticamente (gracias al `healthcheck`) a que SQL Server esté listo para aceptar conexiones.
-    * **Ejecución:** Python creará la tabla `datos_prueba` e insertará un registro.
-    * **Verificación:** Verás en la consola la impresión de los datos insertados.
-
-3.  **Detener el entorno:**
-    Para detener los contenedores presiona `Ctrl + C`. Para eliminar los contenedores y redes:
-
-    ```bash
-    docker compose down
-    ```
+**Diplomado en Gestión de Datos 2026 | Módulos: Diseño Relacional y SQL Performance**
 
 ---
 
-## 📂 Estructura del Proyecto
+## 🛑 Contexto Crítico del Negocio
+Eres el nuevo **Lead Data Engineer** de **LegacyRetail S.A.**, una empresa que está a punto de colapsar técnicamente.
 
-```text
-proyecto-etl-sqlserver/
-├── app/
-│   ├── Dockerfile         # Configuración de imagen Python + Drivers ODBC
-│   ├── main.py            # Script de lógica de negocio (ETL)
-│   └── requirements.txt   # Librerías Python (pandas, pyodbc)
-├── docker-compose.yml     # Orquestador de servicios
-└── README.md              # Documentación
+### El Problema
+Durante 10 años, la empresa registró sus ventas en una sola "hoja de cálculo infinita" (Flat File). Recientemente, intentaron migrar esto a SQL Server tal cual (una sola tabla gigante), lo que causó dos desastres:
+1.  **Inconsistencia de Datos:** El cliente "Juan Pérez" está escrito de 5 formas distintas y su dirección no coincide.
+2.  **Caída del Servidor:** El desarrollador junior intentó hacer un reporte de combinaciones de productos usando un `CROSS JOIN`, lo que generó un bucle que consumió el 100% de la CPU y tumbó el servicio de facturación.
 
-```
+### 🎯 Tu Misión
+Tienes 2 objetivos mandatorios para salvar la operación:
 
-## ⚙️ Configuración y Variables de Entorno
+#### Misión A: Ingeniería Inversa (Normalización 3NF)
+Debes tomar el archivo sucio (`raw_sales_dump.csv`), analizar sus patrones y diseñar un **Esquema Relacional Normalizado** (Tablas separadas con relaciones lógicas) que elimine la redundancia.
 
-Las credenciales están definidas en el archivo `docker-compose.yml`.
-
-| Variable | Valor por Defecto | Descripción |
-| --- | --- | --- |
-| `DB_HOST` | `db` | Nombre del servicio en la red de Docker. |
-| `DB_USER` | `sa` | Usuario administrador de SQL Server. |
-| `DB_PASS` | `TuPasswordFuerte123!` | **Importante:** SQL Server requiere contraseñas complejas (Mayúsculas, minúsculas, números). |
-| `DB_NAME` | `master` | Base de datos por defecto. |
-
-> **Nota:** Si cambias la contraseña en el servicio `db`, asegúrate de actualizarla también en las variables de entorno del servicio `ingesta`.
-
-## 📡 Conexión Manual a la Base de Datos
-
-Si deseas conectar una herramienta externa (como DBeaver, Azure Data Studio o SSMS) mientras el contenedor está corriendo, usa los siguientes parámetros:
-
-* **Host:** `localhost` (o `127.0.0.1`)
-* **Puerto:** `1433`
-* **Usuario:** `sa`
-* **Contraseña:** `TuPasswordFuerte123!`
-
-## 🛠 Detalles Técnicos
-
-### Healthcheck
-
-El `docker-compose.yml` incluye un *healthcheck* en el servicio de base de datos. Esto previene el error común donde Python intenta conectarse antes de que la base de datos haya terminado de iniciarse.
-
-### Drivers ODBC
-
-El `Dockerfile` en la carpeta `app/` instala las librerías del sistema necesarias para `pyodbc` en Linux (Debian/Ubuntu), específicamente `unixodbc-dev` y `msodbcsql17`.
-
-## 🧹 Limpieza de Datos
-
-Los datos de la base de datos persisten en un volumen de Docker llamado `sql_data`. Si deseas reiniciar la base de datos desde cero (borrar todos los datos), ejecuta:
-
-```bash
-docker-compose down -v
-
-```
-
-*(La bandera `-v` elimina los volúmenes asociados).*
+#### Misión B: Auditoría de Performance (Tuning)
+Debes replicar el error del desarrollador junior en un entorno controlado y demostrar con **métricas de ingeniería** (Lecturas Lógicas y Tiempo de CPU) por qué su consulta mató al servidor, proponiendo la solución óptima (`INNER JOIN`).
 
 ---
 
-Desarrollado con ❤️ y Docker.
+## 🛠️ Instrucciones de Entrega
+
+El repositorio ya contiene las carpetas necesarias. Debes completar y subir:
+
+### 1. Diseño (`/02_sql/1_ddl_diseno/`)
+* **Archivo:** `solution_schema.sql`
+* **Requisito:** Código DDL para crear tablas `Clientes`, `Productos`, `Sucursales` y `Ventas`.
+* **Condición:** Todas las tablas deben tener `PRIMARY KEY`. Las relaciones deben tener `FOREIGN KEY`. Usa tipos de datos eficientes (`INT`, `VARCHAR`, `DECIMAL`).
+
+### 2. Performance (`/02_sql/2_performance_lab/`)
+* **Archivo:** `solution_tuning.sql`
+* **Requisito:** Script que ejecute la comparativa entre Cross Join e Inner Join activando `STATISTICS IO`.
+
+### 3. Reporte Final (`/03_docs/entregables/`)
+* **Archivo:** `Reporte_Tecnico.pdf`
+* **Contenido:**
+    * Diagrama Entidad-Relación (DER).
+    * Captura de pantalla de los mensajes de SQL Server mostrando la reducción de *Logical Reads*.
+
+---
+
+## 📚 Recursos de Apoyo (¡Léelos!)
+En la carpeta `03_docs/teoria_y_guias/` encontrarás:
+* `GUIA_NORMALIZACION_3NF.md`: Tutorial paso a paso para pasar de Excel a SQL.
+* `GUIA_PERFORMANCE_TUNING.md`: Cómo interpretar los planes de ejecución y lecturas.
+
+¡Manos a la obra, Ingeniero!
