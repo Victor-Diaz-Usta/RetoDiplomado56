@@ -1,6 +1,6 @@
 /*/
 RETO PARTE A: DISEÑO DEL ESQUEMA RELACIONAL
-Estudiante: Victor Hugo Diaz
+Estudiante: Victor Hugo Díaz
 Fecha: 20/01/2026
 
 ```
